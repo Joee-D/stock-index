@@ -30,8 +30,8 @@ TIME_SEGMENTS = [
         "name": "Premarket",
         "ticker": "NQ=F",
         "display_name": "NASDAQ FUTURES",
-        "start_time": "00:00",
-        "end_time": "09:30",
+        "start_time": "04:00",
+        "end_time": "13:30",
         "xticks": [0, 150, 285],
         "xticklabels": ["00:00", "05:00", "09:30"],
         "output_file": "nq_trend.png"
@@ -40,8 +40,8 @@ TIME_SEGMENTS = [
         "name": "Regular",
         "ticker": "^NDX",
         "display_name": "NASDAQ 100",
-        "start_time": "09:30",
-        "end_time": "22:00",
+        "start_time": "13:30",
+        "end_time": "20:11",
         "xticks": [0, 105, 195],
         "xticklabels": ["09:30", "13:00", "16:00"],
         "output_file": "ndx_trend.png"
@@ -168,8 +168,8 @@ def process_segment(config, do_push=True):
 
 
 def is_in_trading_hours(config):
-    """判断是否在交易时间（本地时区）"""
-    now = datetime.now().time()
+    """判断是否在交易时间（UTC 时区）"""
+    now = datetime.utcnow().time()
     start = datetime.strptime(config["start_time"], "%H:%M").time()
     end = datetime.strptime(config["end_time"], "%H:%M").time()
     return (start <= now < end) if start < end else (now >= start or now < end)
@@ -183,7 +183,7 @@ def main():
 
     do_push = not args.no_push
 
-    logging.info("Market display run at %s", datetime.now().isoformat())
+    logging.info("Market display run at %s", datetime.utcnow().isoformat())
     for config in TIME_SEGMENTS:
         if args.all or is_in_trading_hours(config):
             process_segment(config, do_push=do_push)
