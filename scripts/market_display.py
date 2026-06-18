@@ -141,7 +141,7 @@ def push_to_device(img_io, filename):
         return False
 
 
-def process_segment(config, do_push=True, out_dir="."):
+def process_segment(config, do_push=True):
     """处理单个时间段并可选推送"""
     prices, ticker_obj, previous_close = fetch_market_data(config["ticker"])
 
@@ -162,13 +162,7 @@ def process_segment(config, do_push=True, out_dir="."):
     img_io.seek(0)
     plt.close(fig)
 
-    local_path = os.path.join(out_dir, config["output_file"])
-    with open(local_path, "wb") as f:
-        f.write(img_io.getvalue())
-    logging.info("Saved chart to %s", local_path)
-
     if do_push:
-        img_io.seek(0)
         return push_to_device(img_io, config["output_file"])
     return True
 
@@ -185,7 +179,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--no-push", action="store_true", help="仅生成图片，不推送到设备（测试模式）")
     parser.add_argument("--all", action="store_true", help="忽略时间段判断，处理所有配置")
-    parser.add_argument("--out-dir", default=".", help="保存图片的目录")
     args = parser.parse_args()
 
     do_push = not args.no_push
@@ -193,7 +186,7 @@ def main():
     logging.info("Market display run at %s", datetime.now().isoformat())
     for config in TIME_SEGMENTS:
         if args.all or is_in_trading_hours(config):
-            process_segment(config, do_push=do_push, out_dir=args.out_dir)
+            process_segment(config, do_push=do_push)
 
 if __name__ == "__main__":
     main()
